@@ -10,15 +10,13 @@ datasource db {
 }
 
 model user {
-    id           String         @id @default(uuid())
-    name         String?
-    email        String         @unique
-    password     String
-    role         String?
-    createdAt    DateTime       @default(now())
-    updatedAt    DateTime       @updatedAt
-    projects     project[]      @relation("UserProjects")
-    workingHours workinghours[]
+    id        String   @id @default(uuid())
+    name      String?
+    email     String   @unique
+    password  String
+    role      String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
 }
 
 model project {
@@ -28,19 +26,28 @@ model project {
     description  String?
     createdAt    DateTime       @default(now())
     updatedAt    DateTime       @updatedAt
-    users        user[]         @relation("UserProjects")
+    employees    employees[]    @relation("EmployeeProjects")
+    workingHours workinghours[]
+}
+
+model employees {
+    id           String         @id @default(uuid())
+    name         String
+    createdAt    DateTime       @default(now())
+    updatedAt    DateTime       @updatedAt
+    projects     project[]      @relation("EmployeeProjects")
     workingHours workinghours[]
 }
 
 model workinghours {
-    id        String   @id @default(uuid())
-    hours     Float
-    date      DateTime
-    userId    String
-    projectId String
-    user      user     @relation(fields: [userId], references: [id])
-    project   project  @relation(fields: [projectId], references: [id])
+    id         String    @id @default(uuid())
+    hours      Int
+    date       DateTime
+    employeeId String
+    projectId  String
+    employees  employees @relation(fields: [employeeId], references: [id])
+    project    project   @relation(fields: [projectId], references: [id])
 
-    @@index([userId])
+    @@index([employeeId])
     @@index([projectId])
 }

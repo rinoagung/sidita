@@ -1,6 +1,6 @@
 // DashboardPage.js (Server Component)
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "../api/auth/[...nextauth]/route.js"; // Pastikan path ini benar
+import { authOptions } from "@/app/api/auth/[...nextauth]/route.js"; // Pastikan path ini benar
 import DashboardClient from './DashboardClient'; // Import Komponen Client
 
 
