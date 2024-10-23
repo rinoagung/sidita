@@ -136,7 +136,7 @@ const DashboardClient = () => {
                                         {entry.project.name}
                                     </td>
                                     <td className="px-6 py-4">
-                                        {entry.hours}
+                                        {entry.hours} jam
                                     </td>
                                     <td className="px-6 py-4">
                                         {entry.dayValue}
