@@ -1,36 +1,64 @@
 import prisma from "@utils/connection";
 
-export async function GET() {
+export async function GET(req) {
+    const { searchParams } = new URL(req.url);
+    const year = searchParams.get('year');
+    const month = searchParams.get('month');
+    const day = searchParams.get('day');
+
+    const whereClause = {};
+
+    if (year || month || day) {
+        whereClause.date = {};
+
+        if (year) {
+            whereClause.date.gte = new Date(`${year}-${month || '01'}-${day || '01'}`);
+            whereClause.date.lt = new Date(`${year}-${month || '12'}-${day ? `${Number(day) + 1}` : '31'}`);
+        }
+    }
+
     const workingHoursData = await prisma.workinghours.findMany({
+        where: whereClause,
         include: {
             employees: {
-                select: { id: true, name: true } // Ambil data employee yang diperlukan
+                select: { id: true, name: true }
             },
             project: {
-                select: { id: true, name: true } // Ambil data project yang diperlukan
+                select: { id: true, name: true }
             }
         }
     });
 
-    // Menghitung total jam kerja per proyek per hari dan total jam kerja bulanan
+    const employees = await prisma.employees.findMany({
+        select: {
+            id: true,
+            name: true,
+        },
+    });
+
+    const projects = await prisma.project.findMany({
+        select: {
+            id: true,
+            name: true,
+        },
+    });
+
     const projectHours = {};
 
     workingHoursData.forEach(entry => {
-        const dateKey = entry.date.toISOString().split('T')[0]; // Mengambil tanggal tanpa waktu
+        const dateKey = entry.date.toISOString().split('T')[0];
         const projectId = entry.projectId;
 
-        // Inisialisasi proyek jika belum ada
         if (!projectHours[projectId]) {
             projectHours[projectId] = {};
         }
         if (!projectHours[projectId][dateKey]) {
             projectHours[projectId][dateKey] = 0;
         }
-        projectHours[projectId][dateKey] += entry.hours; // Menambahkan jam kerja
+        projectHours[projectId][dateKey] += entry.hours;
 
     });
 
-    // Menambahkan nilai ke setiap entry untuk proyek per hari
     const enhancedWorkingHoursData = workingHoursData.map(entry => {
         const dateKey = entry.date.toISOString().split('T')[0];
         const projectId = entry.projectId;
@@ -40,13 +68,13 @@ export async function GET() {
 
         return {
             ...entry,
-            dayValue // Menambahkan nilai ke setiap entry
+            dayValue
         };
     });
 
     return new Response(JSON.stringify({
         workingHours: enhancedWorkingHoursData,
-        projectHours
+        projectHours, employees, projects
     }), {
         headers: { 'Content-Type': 'application/json' }
     });

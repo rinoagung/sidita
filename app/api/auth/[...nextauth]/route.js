@@ -17,7 +17,7 @@ const handler = NextAuth({
             async authorize(credentials) {
                 const { email, password } = credentials;
 
-                // Cek apakah user ada
+
                 const user = await prisma.user.findUnique({
                     where: { email },
                 });
@@ -26,7 +26,6 @@ const handler = NextAuth({
                     throw new Error("No user found with the email");
                 }
 
-                // Verifikasi password
                 const isValidPassword = await bcrypt.compare(password, user.password);
                 if (!isValidPassword) {
                     throw new Error("Invalid password");

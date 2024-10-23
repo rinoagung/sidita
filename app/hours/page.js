@@ -1,14 +1,15 @@
-// workinghours.js (Client Component)
-"use client"; // Menandakan ini adalah komponen client
+"use client";
 
+import useAlert from '@components/alert';
 import { useEffect, useState } from 'react';
-import { signOut } from "next-auth/react";
 import Provider from "@components/provider";
 import Nav from "@components/nav";
 import { useRouter } from 'next/navigation';
 
 
 const workinghours = () => {
+    const { alert, showAlert, alertClass } = useAlert();
+
     const [employee, setEmployee] = useState([]);
     const [project, setProject] = useState([]);
     const [workinghours, setWorkinghours] = useState([]);
@@ -18,23 +19,22 @@ const workinghours = () => {
     const [selectedProject, setSelectedProject] = useState('');
     const router = useRouter();
 
+    const fetchworkinghours = async () => {
+        const response = await fetch('/api/workinghours/get');
+        if (!response.ok) {
+            console.error('Error fetching data:', response.statusText);
+            return;
+        }
+        const data = await response.json();
+        console.log(data)
+        setWorkinghours(data.workingHours || []);
+        setEmployee(data.employees || []);
+        setProject(data.projects || []);
+    };
     useEffect(() => {
-        const fetchworkinghours = async () => {
-            const response = await fetch('/api/workinghours/get');
-            if (!response.ok) {
-                console.error('Error fetching data:', response.statusText); // Log status error
-                return; // Keluar dari fungsi jika ada kesalahan
-            }
-            const data = await response.json();
-            console.log(data)
-            setWorkinghours(data.workingHours || []);
-            setEmployee(data.employees || []);
-            setProject(data.projects || []);
-        };
 
         fetchworkinghours();
     }, []);
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -48,8 +48,10 @@ const workinghours = () => {
         });
 
         if (response.ok) {
-            // Jika berhasil, redirect ke halaman proyek
-            router.push('/projects/new');
+
+            showAlert('Data berhasil ditambahkan!', 'success');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            fetchworkinghours()
         } else {
             const errorData = await response.json();
             console.error('Error adding project:', errorData.error);
@@ -57,26 +59,35 @@ const workinghours = () => {
     };
 
     const deleteWorkingHours = async (id) => {
-        const response = await fetch(`/api/workinghoours/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id }),
-        });
+        const confirmed = window.confirm("Apakah Anda yakin ingin menghapus data ini?");
+        if (confirmed) {
+            const response = await fetch(`/api/workinghours/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id }),
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            console.log(data.message);
-        } else {
-            console.error('Error deleting employee:', data);
+            const data = await response.json();
+            if (response.ok) {
+                fetchworkinghours()
+                console.log(data.message);
+            } else {
+                console.error('Error deleting employee:', data);
+            }
         }
     };
 
     return (
         <Provider>
             <Nav />
-            <div className="w-10/12 mx-auto mt-48">
+            <div className="w-10/12 mx-auto my-48">
+                {alert.visible && (
+                    <div className={`p-4 mb-4 text-sm ${alertClass()} bg-${alert.type == 'success' ? 'green' : alert.type == 'error' ? 'red' : 'blue'}-100 rounded`} role="alert">
+                        {alert.message}
+                    </div>
+                )}
                 <div className="container mx-auto p-4">
                     <h1 className="text-2xl font-bold mb-4">Add New Working Hours</h1>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -170,7 +181,7 @@ const workinghours = () => {
                                         {new Date(entry.date).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                                        <a href={`/hours/${entry.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                                         <button type='button' onClick={() => deleteWorkingHours(p.id)} className="font-medium ms-5 text-red-600 dark:text-red-500 hover:underline">Delete</button>
 
                                     </td>

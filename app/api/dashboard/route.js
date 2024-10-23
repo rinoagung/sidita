@@ -4,10 +4,10 @@ export async function GET() {
     const workingHoursData = await prisma.workinghours.findMany({
         include: {
             user: {
-                select: { id: true, name: true, email: true } // Ambil data user yang diperlukan
+                select: { id: true, name: true, email: true }
             },
             project: {
-                select: { id: true, name: true } // Ambil data project yang diperlukan
+                select: { id: true, name: true }
             }
         }
     });

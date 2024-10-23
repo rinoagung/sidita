@@ -3,7 +3,6 @@ import prisma from "@utils/connection";
 export async function POST(request) {
     const { selectedEmployee, hours, selectedProject } = await request.json();
 
-    // Validasi data
     if (!selectedEmployee) {
         return new Response(JSON.stringify({ error: 'Employee is required' }), { status: 400 });
     }

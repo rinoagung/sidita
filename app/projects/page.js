@@ -1,32 +1,32 @@
-// projects.js (Client Component)
-"use client"; // Menandakan ini adalah komponen client
+"use client";
 
+import useAlert from '@components/alert';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Provider from "@components/provider";
 import Nav from "@components/nav";
 
 const projects = () => {
+
+    const { alert, showAlert, alertClass } = useAlert();
     const [name, setName] = useState('');
     const [location, setLocation] = useState('');
     const [description, setDescription] = useState('');
-    const router = useRouter();
 
     const [project, setProject] = useState([]);
 
+    const fetchProject = async () => {
+        const response = await fetch('/api/projects/get');
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            console.error('Error fetching projects:', errorData.error);
+            return;
+        }
+
+        const data = await response.json();
+        setProject(data);
+    };
     useEffect(() => {
-        const fetchProject = async () => {
-            const response = await fetch('/api/projects/get');
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                console.error('Error fetching projects:', errorData.error);
-                return; // Keluar dari fungsi jika ada kesalahan
-            }
-
-            const data = await response.json();
-            setProject(data); // Atur state dengan data proyek yang diambil
-        };
 
         fetchProject();
     }, []);
@@ -43,8 +43,10 @@ const projects = () => {
         });
 
         if (response.ok) {
-            // Jika berhasil, redirect ke halaman proyek
-            router.push('/projects');
+
+            showAlert('Data berhasil ditambahkan!', 'success');
+
+            fetchProject();
         } else {
             const errorData = await response.json();
             console.error('Error adding project:', errorData.error);
@@ -53,19 +55,27 @@ const projects = () => {
 
 
     const deleteProject = async (id) => {
-        const response = await fetch(`/api/project/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ id }),
-        });
+        const confirmed = window.confirm("Apakah Anda yakin ingin menghapus project ini?");
+        if (confirmed) {
+            const response = await fetch(`/api/projects/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ id }),
+            });
 
-        const data = await response.json();
-        if (response.ok) {
-            console.log(data.message);
-        } else {
-            console.error('Error deleting employee:', data);
+            const data = await response.json();
+            if (response.ok) {
+                showAlert('Data berhasil dihapus!', 'error');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                fetchProject();
+                console.log(data.message);
+            } else {
+                showAlert(data.message, 'error');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                console.error('Error deleting project:', data);
+            }
         }
     };
 
@@ -73,7 +83,12 @@ const projects = () => {
     return (
         <Provider>
             <Nav />
-            <div className="w-10/12 mx-auto mt-48">
+            <div className="w-10/12 mx-auto my-48">
+                {alert.visible && (
+                    <div className={`p-4 mb-4 text-sm ${alertClass()} bg-${alert.type == 'success' ? 'green' : alert.type == 'error' ? 'red' : 'blue'}-100 rounded`} role="alert">
+                        {alert.message}
+                    </div>
+                )}
                 <div className="container mx-auto p-4">
                     <h1 className="text-2xl font-bold mb-4">Add New Project</h1>
                     <form onSubmit={handleSubmit} className="space-y-4">
@@ -148,7 +163,7 @@ const projects = () => {
                                         {new Date(p.createdAt).toLocaleDateString()}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                                        <a href={`/projects/${p.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
                                         <button type='button' onClick={() => deleteProject(p.id)} className="font-medium ms-5 text-red-600 dark:text-red-500 hover:underline">Delete</button>
                                     </td>
                                 </tr>

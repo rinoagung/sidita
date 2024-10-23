@@ -3,7 +3,7 @@ import prisma from "@utils/connection";
 export async function POST(request) {
     const { name, location, description } = await request.json();
 
-    // Validasi data
+
     if (!name) {
         return new Response(JSON.stringify({ error: 'Name is required' }), { status: 400 });
     }

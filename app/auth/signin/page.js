@@ -1,4 +1,3 @@
-// pages/auth/signin.js
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 import { useRouter } from "next/router";
@@ -19,7 +18,7 @@ export default function SignIn() {
         if (result.error) {
             alert(result.error);
         } else {
-            router.push("/"); // Arahkan ke halaman utama setelah login
+            router.push("/");
         }
     };
 

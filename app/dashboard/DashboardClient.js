@@ -1,5 +1,4 @@
-// DashboardClient.js (Client Component)
-"use client"; // Menandakan ini adalah komponen client
+"use client";
 
 import { useEffect, useState } from 'react';
 import { signOut } from "next-auth/react";
@@ -7,33 +6,110 @@ import Provider from "@components/provider";
 import Nav from "@components/nav";
 
 const DashboardClient = () => {
-    const [dashboard, setDashboard] = useState([]);
+    const today = new Date();
+    const monthNames = ["January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+    ];
 
+    const [workinghours, setWorkinghours] = useState([]);
+    const [year, setYear] = useState(today.getFullYear());
+    const [month, setMonth] = useState(today.getMonth() + 1); // Bulan dimulai dari 0
+    const [day, setDay] = useState("");
+
+    const fetchworkinghours = async () => {
+        const response = await fetch(`/api/workinghours/get?year=${year}&month=${month}&day=${day}`);
+        if (!response.ok) {
+            console.error('Error fetching data:', response.statusText);
+            return;
+        }
+        const data = await response.json();
+        setWorkinghours(data.workingHours || []);
+    };
     useEffect(() => {
-        const fetchDashboard = async () => {
-            const response = await fetch('/api/dashboard');
-            if (!response.ok) {
-                console.error('Error fetching data:', response.statusText); // Log status error
-                return; // Keluar dari fungsi jika ada kesalahan
-            }
-            const data = await response.json();
-            setDashboard(data);
-        };
+        fetchworkinghours();
+    }, [month, day, year]);
 
-        fetchDashboard();
-    }, []);
+    const handleFilter = (e) => {
+        e.preventDefault();
+        fetchworkinghours();
+    };
+
+    const getDaysInMonth = (year, month) => {
+        return new Date(year, month, 0).getDate();
+    };
 
     return (
         <Provider>
             <Nav />
 
-            <div className="w-10/12 mx-auto mt-48">
-                <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+            <div className="w-10/12 mx-auto my-48">
+                <form onSubmit={handleFilter} className="mb-4">
+                    <div className="grid grid-cols-3 gap-4">
+                        <div>
+                            <label htmlFor="year" className="block mb-1">Year:</label>
+                            <select
+                                id="year"
+                                value={year}
+                                onChange={(e) => setYear(e.target.value)}
+                                className="border border-gray-300 rounded p-2 w-full"
+                            >
+                                <option value="">-</option>
+                                {Array.from({ length: 10 }, (_, i) => {
+                                    const currentYear = new Date().getFullYear();
+                                    return (
+                                        <option key={i} value={currentYear - i}>
+                                            {currentYear - i}
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="month" className="block mb-1">Month:</label>
+                            <select
+                                id="month"
+                                value={month}
+                                onChange={(e) => {
+                                    setMonth(e.target.value);
+                                    setDay(''); // Reset hari saat bulan diubah
+                                }}
+                                className="border border-gray-300 rounded p-2 w-full"
+                            >
+                                <option value="">-</option>
+                                {Array.from({ length: 12 }, (_, i) => (
+                                    <option key={i} value={i + 1}>
+                                        {monthNames[i]}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div>
+                            <label htmlFor="day" className="block mb-1">Day:</label>
+                            <select
+                                id="day"
+                                value={day}
+                                onChange={(e) => setDay(e.target.value)}
+                                className="border border-gray-300 rounded p-2 w-full"
+                            >
+                                <option value="">-</option>
+                                {month && year && Array.from({ length: getDaysInMonth(year, month) }, (_, i) => (
+                                    <option key={i} value={i + 1}>
+                                        {i + 1}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+                    </div>
+
+                </form>
+                <div className="relative mt-14 overflow-x-auto shadow-md sm:rounded-lg">
                     <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
                         <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" className="px-6 py-3">
-                                    User
+                                    Employee
                                 </th>
                                 <th scope="col" className="px-6 py-3">
                                     Project
@@ -42,18 +118,19 @@ const DashboardClient = () => {
                                     Duration
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Date
+                                    8 hours of daily <br />
+                                    project time
                                 </th>
                                 <th scope="col" className="px-6 py-3">
-                                    Action
+                                    Date
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
-                            {dashboard.map((entry) => (
-                                <tr className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
+                            {workinghours.map((entry, i) => (
+                                <tr key={i} className="odd:bg-white odd:dark:bg-gray-900 even:bg-gray-50 even:dark:bg-gray-800 border-b dark:border-gray-700">
                                     <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                        {entry.user.name}
+                                        {entry.employees.name}
                                     </th>
                                     <td className="px-6 py-4">
                                         {entry.project.name}
@@ -62,10 +139,10 @@ const DashboardClient = () => {
                                         {entry.hours}
                                     </td>
                                     <td className="px-6 py-4">
-                                        {new Date(entry.date).toLocaleDateString()}
+                                        {entry.dayValue}
                                     </td>
                                     <td className="px-6 py-4">
-                                        <a href="#" className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
+                                        {new Date(entry.date).toLocaleDateString()}
                                     </td>
                                 </tr>
                             ))}
