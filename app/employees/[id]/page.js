@@ -59,6 +59,12 @@ const employees = () => {
                         {alert.message}
                     </div>
                 )}
+                <a
+                    href="/employees"
+                    className="inline-flex items-center px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700"
+                >
+                    Back
+                </a>
                 <div className="container mx-auto p-4">
                     <h1 className="text-2xl font-bold mb-4">Edit Employee</h1>
                     <form onSubmit={handleSubmit} className="space-y-4">

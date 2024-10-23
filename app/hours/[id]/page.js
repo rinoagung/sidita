@@ -25,7 +25,6 @@ const workinghours = () => {
                 const response = await fetch(`/api/workinghours/${id}`);
                 if (response.ok) {
                     const data = await response.json();
-                    console.log(data)
                     setSelectedEmployee(data.workinghours.employeeId)
                     setSelectedProject(data.workinghours.projectId)
                     setHours(data.workinghours.hours)
@@ -71,6 +70,12 @@ const workinghours = () => {
                         {alert.message}
                     </div>
                 )}
+                <a
+                    href="/hours"
+                    className="inline-flex items-center px-3 py-1 text-xs font-semibold text-white bg-blue-600 rounded-full hover:bg-blue-700"
+                >
+                    Back
+                </a>
                 <div className="container mx-auto p-4">
                     <h1 className="text-2xl font-bold mb-4">Update New Working Hours</h1>
                     <form onSubmit={handleSubmit} className="space-y-4">

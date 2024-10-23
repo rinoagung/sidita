@@ -26,7 +26,6 @@ const workinghours = () => {
             return;
         }
         const data = await response.json();
-        console.log(data)
         setWorkinghours(data.workingHours || []);
         setEmployee(data.employees || []);
         setProject(data.projects || []);
@@ -74,7 +73,6 @@ const workinghours = () => {
                 showAlert('Data berhasil dihapus!', 'success');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 fetchworkinghours()
-                console.log(data.message);
             } else {
                 console.error('Error deleting employee:', data);
             }

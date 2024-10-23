@@ -1,7 +1,6 @@
 import prisma from "@utils/connection";
 
 export async function GET(req, { params }) {
-    console.log(params)
     const id = params.id;
 
     if (!id) {

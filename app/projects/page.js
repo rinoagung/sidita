@@ -70,7 +70,6 @@ const projects = () => {
                 showAlert('Data berhasil dihapus!', 'success');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 fetchProject();
-                console.log(data.message);
             } else {
                 showAlert(data.message, 'error');
                 window.scrollTo({ top: 0, behavior: 'smooth' });

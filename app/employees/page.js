@@ -64,7 +64,6 @@ const employees = () => {
             if (response.ok) {
                 showAlert('Data berhasil dihapus!', 'success');
                 fetchEmployee();
-                console.log(data.message);
             } else {
                 showAlert(data.message, 'error');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
