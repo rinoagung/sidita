@@ -1,7 +1,6 @@
 "use client";
 import localFont from "next/font/local";
 import "./globals.css";
-import { useSearchParams } from "next/navigation";
 
 const geistSans = localFont({
     src: "./fonts/GeistVF.woff",
@@ -16,7 +15,6 @@ const geistMono = localFont({
 
 
 export default function RootLayout({ children }) {
-    const searchParams = useSearchParams()
     return (
         <html lang="en">
             <body
