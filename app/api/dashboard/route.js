@@ -3,8 +3,8 @@ import prisma from "@utils/connection";
 export async function GET() {
     const workingHoursData = await prisma.workinghours.findMany({
         include: {
-            user: {
-                select: { id: true, name: true, email: true }
+            employees: {
+                select: { id: true, name: true }
             },
             project: {
                 select: { id: true, name: true }
