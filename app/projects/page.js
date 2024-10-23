@@ -67,7 +67,7 @@ const projects = () => {
 
             const data = await response.json();
             if (response.ok) {
-                showAlert('Data berhasil dihapus!', 'error');
+                showAlert('Data berhasil dihapus!', 'success');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
                 fetchProject();
                 console.log(data.message);

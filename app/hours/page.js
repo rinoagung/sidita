@@ -71,6 +71,8 @@ const workinghours = () => {
 
             const data = await response.json();
             if (response.ok) {
+                showAlert('Data berhasil dihapus!', 'success');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
                 fetchworkinghours()
                 console.log(data.message);
             } else {
@@ -182,7 +184,7 @@ const workinghours = () => {
                                     </td>
                                     <td className="px-6 py-4">
                                         <a href={`/hours/${entry.id}`} className="font-medium text-blue-600 dark:text-blue-500 hover:underline">Edit</a>
-                                        <button type='button' onClick={() => deleteWorkingHours(p.id)} className="font-medium ms-5 text-red-600 dark:text-red-500 hover:underline">Delete</button>
+                                        <button type='button' onClick={() => deleteWorkingHours(entry.id)} className="font-medium ms-5 text-red-600 dark:text-red-500 hover:underline">Delete</button>
 
                                     </td>
                                 </tr>

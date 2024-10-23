@@ -20,6 +20,6 @@ export async function POST(request) {
         });
     } catch (error) {
         console.error(error);
-        return new Response(JSON.stringify({ error: 'Failed to create project' }), { status: 500 });
+        return new Response(JSON.stringify({ error: 'Failed to create employee' }), { status: 500 });
     }
 }
